@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Solo Leveling: IRL System</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 
   <style>
     :root {
@@ -26,6 +26,11 @@
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      overflow-x: hidden;
     }
 
     body {
@@ -202,6 +207,9 @@
       margin-top: 6px;
       font-size: 11px;
       align-items: center;
+
+      /* mobile layout fix */
+      flex-wrap: wrap;
     }
 
     .player-name-row span {
@@ -212,6 +220,16 @@
     .player-name-display {
       font-size: 11px;
       color: var(--accent-strong);
+
+      /* mobile layout fix */
+      flex: 1 1 100%;
+    }
+
+    /* mobile layout fix for input inside flex */
+    #player-name-input {
+      flex: 1 1 220px;
+      min-width: 0;
+      width: auto;
     }
 
     .stats-grid {
@@ -307,17 +325,20 @@
       display: flex;
       gap: 8px;
       flex: 1;
+      min-width: 0;
     }
 
     .quest-main {
       display: flex;
       flex-direction: column;
       gap: 3px;
+      min-width: 0;
     }
 
     .quest-title {
       font-weight: 600;
       font-size: 13px;
+      word-break: break-word;
     }
 
     .quest-meta {
@@ -349,6 +370,7 @@
       display: flex;
       flex-direction: column;
       gap: 4px;
+      flex: 0 0 auto;
     }
 
     .status-text {
@@ -388,6 +410,7 @@
       font-size: 13px;
       font-weight: 600;
       color: #fee2e2;
+      word-break: break-word;
     }
 
     .urgent-meta {
@@ -448,6 +471,13 @@
       padding: 6px 10px;
       color: var(--text-main);
       width: 100%;
+    }
+
+    /* iOS Safari zoom fix: inputs under 16px trigger auto-zoom and "distortion" */
+    @media (max-width: 560px) {
+      input, select, button {
+        font-size: 16px;
+      }
     }
 
     .add-quest-form {
@@ -545,7 +575,7 @@
         <button class="small" id="urgent-roll-btn">Roll Urgent Quest</button>
       </div>
       <div class="urgent-header-row">
-        <span>Random high‑pressure missions. Accept at your own risk.</span>
+        <span>Random high-pressure missions. Accept at your own risk.</span>
         <span id="urgent-status-label"></span>
       </div>
       <div class="urgent-body" id="urgent-body">
@@ -937,7 +967,7 @@
     function setupUrgent(state) {
       const rollBtn = document.getElementById("urgent-roll-btn");
       rollBtn.addEventListener("click", () => {
-        const randomIndex = Math.floor(Math.random() * URGENT_QUESTS.length); // [web:40]
+        const randomIndex = Math.floor(Math.random() * URGENT_QUESTS.length);
         const base = URGENT_QUESTS[randomIndex];
         state.urgent = {
           quest: { ...base },
@@ -949,7 +979,7 @@
     }
 
     (function init() {
-      const state = loadState(); // [web:46][web:52][web:57]
+      const state = loadState();
       const todayKey = getTodayKey();
       if (state.lastOpened !== todayKey) {
         state.lastOpened = todayKey;
