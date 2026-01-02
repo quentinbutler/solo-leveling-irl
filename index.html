@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Solo Leveling: IRL System</title>
+
+  <!-- Mobile-friendly viewport -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" /> 
+
+  <style>
+    /* ===== Base + Layout (mobile-first) ===== */
+    :root {
+      --bg-main: #020617;
+      --bg-panel: rgba(15, 23, 42, 0.9);
+      --bg-chip: rgba(15, 23, 42, 0.9);
+      --accent: #22d3ee;
+      --accent-strong: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.2);
+      --danger: #f97373;
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --border-soft: rgba(148, 163, 184, 0.35);
+      --shadow-soft: 0 0 25px rgba(56, 189, 248, 0.35);
+      --radius-lg: 18px;
+      --radius-md: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.16), transparent 60%),
+        radial-gradient(circle at 100% 100%, rgba(129, 140, 248, 0.16), transparent 60%),
+        #020617;
+      color: var(--text-main);
+      min-height: 100vh;
+      padding: 12px 10px 24px;
+    }
+
+    .app-shell {
+      max-width: 480px;
+      margin: 0 auto;
+      border-radius: 24px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.96));
+      box-shadow: 0 0 40px rgba(15, 23, 42, 0.9);
+      padding: 12px 12px 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* subtle scanlines / system vibe */
+    .app-shell::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: linear-gradient(
+        rgba(15, 23, 42, 0.4) 1px,
+        transparent 1px
+      );
+      background-size: 100% 2px;
+      opacity: 0.2;
+      pointer-events: none;
+      mix-blend-mode: screen;
+    }
+
+    header {
+      position: relative;
+      z-index: 1;
+      padding: 6px 2px 10px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .title-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    h1 {
+      font-size: 18px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .subtitle {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .hp-badge {
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--accent-soft);
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.2), transparent 70%);
+    }
+
+    .hp-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #22c55e, #4ade80);
+      box-shadow: 0 0 8px rgba(74, 222, 128, 0.9);
+    }
+
+    .section {
+      position: relative;
+      z-index: 1;
+      background: var(--bg-panel);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-soft);
+      box-shadow: 0 0 18px rgba(15, 23, 42, 0.8);
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+
+    .section-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pill {
+      border-radius: 999px;
+      padding: 2px 8px;
+      border: 1px solid var(--accent-soft);
+      font-size: 10px;
+      color: var(--accent-strong);
+    }
+
+    /* ===== Player / Stats ===== */
+    .player-header {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+
+    .player-main-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+    }
+
+    .player-main-row strong {
+      font-size: 14px;
+      color: var(--accent-strong);
+    }
+
+    .xp-bar-outer {
+      position: relative;
+      width: 100%;
+      height: 10px;
+      border-radius: 999px;
+      background: radial-gradient(circle at center, rgba(15, 23, 42, 0.9), #020617);
+      overflow: hidden;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+    }
+
+    .xp-bar-inner {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, #22d3ee, #38bdf8, #6366f1);
+      width: 40%;
+      transform-origin: left;
+      transform: scaleX(0);
+      transition: transform 0.25s ease-out;
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.8);
+    }
+
+    .xp-label-row {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 3px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    @media (min-width: 560px) {
+      .app-shell {
+        max-width: 560px;
+        padding: 16px 16px 22px;
+      }
+      .stats-grid {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+      }
+    }
+
+    .stat-card {
+      border-radius: var(--radius-md);
+      padding: 6px 6px 7px;
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 1));
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      box-shadow: 0 0 10px rgba(15, 23, 42, 0.9);
+    }
+
+    .stat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+    }
+
+    .stat-value {
+      font-size: 16px;
+      font-weight: 600;
+      color: #f9fafb;
+      margin-bottom: 3px;
+    }
+
+    .stat-bar {
+      height: 5px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      overflow: hidden;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+    }
+
+    .stat-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #22c55e, #a3e635);
+      box-shadow: 0 0 8px rgba(34, 197, 94, 0.7);
+      transition: width 0.25s ease-out;
+    }
+
+    /* ===== Quests ===== */
+    .quests-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .quests-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .quest-card {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      padding: 8px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.98));
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      box-shadow: var(--shadow-soft);
+      font-size: 12px;
+    }
+
+    .quest-left {
+      display: flex;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .quest-main {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .quest-title {
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .quest-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .tag {
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: var(--bg-chip);
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .tag-Strength { border-color: #f97373; color: #fecaca; }
+    .tag-Wisdom { border-color: #38bdf8; color: #bae6fd; }
+    .tag-Money { border-color: #4ade80; color: #bbf7d0; }
+    .tag-Social { border-color: #facc15; color: #fef9c3; }
+    .tag-Mental\ Health { border-color: #a855f7; color: #e9d5ff; }
+
+    .quest-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .status-text {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .status-complete {
+      color: #4ade80;
+    }
+
+    .status-fail {
+      color: var(--danger);
+    }
+
+    /* ===== Form / Buttons ===== */
+    button, input, select {
+      font-family: inherit;
+      font-size: 12px;
+    }
+
+    button {
+      background: radial-gradient(circle at top, var(--accent-strong), #0ea5e9);
+      color: #f9fafb;
+      border: 1px solid rgba(56, 189, 248, 0.9);
+      border-radius: 999px;
+      padding: 6px 10px;
+      cursor: pointer;
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.8);
+      white-space: nowrap;
+    }
+
+    button.small {
+      padding: 4px 8px;
+      font-size: 11px;
+      box-shadow: none;
+    }
+
+    button.secondary {
+      background: rgba(15, 23, 42, 0.9);
+      border-color: rgba(148, 163, 184, 0.7);
+      box-shadow: none;
+      color: var(--text-muted);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    input, select {
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      border-radius: 999px;
+      padding: 6px 10px;
+      color: var(--text-main);
+      width: 100%;
+    }
+
+    .add-quest-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .add-quest-form .full {
+      grid-column: 1 / -1;
+    }
+
+    .footer-note {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    /* ===== Small-screen tweaks ===== */
+    @media (max-width: 380px) {
+      h1 { font-size: 16px; }
+      .player-main-row { flex-direction: column; align-items: flex-start; }
+      .quest-card { flex-direction: column; }
+      .quest-actions { flex-direction: row; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header>
+      <div class="title-stack">
+        <h1>SYSTEM ONLINE</h1>
+        <div class="subtitle">Solo Leveling: IRL Status Window</div>
+      </div>
+      <div class="hp-badge">
+        <div class="hp-dot"></div>
+        <span id="daily-reset-info">Syncing…</span>
+      </div>
+    </header>
+
+    <!-- Player / Stats -->
+    <section class="section">
+      <div class="section-title">
+        <span>Player Status</span>
+        <span class="pill" id="player-title-pill">Rookie Hunter</span>
+      </div>
+
+      <div class="player-header">
+        <div class="player-main-row">
+          <div>Level <strong id="player-level">1</strong></div>
+          <div>XP <strong><span id="player-xp">0</span>/<span id="player-next-xp">100</span></strong></div>
+        </div>
+        <div class="xp-bar-outer">
+          <div class="xp-bar-inner" id="xp-bar"></div>
+        </div>
+        <div class="xp-label-row">
+          <span>Next level in sight.</span>
+          <span id="player-title">Rookie Hunter</span>
+        </div>
+      </div>
+
+      <div class="stats-grid" id="stats-grid">
+        <!-- Stat cards injected -->
+      </div>
+    </section>
+
+    <!-- Quests -->
+    <section class="section">
+      <div class="section-title">
+        <span>Daily Quests</span>
+        <button class="small secondary" id="reset-today-btn">Reset Today</button>
+      </div>
+      <div class="quests-header-row">
+        <span>Complete all to clear today’s routine.</span>
+        <span>Auto-resets every new day.</span>
+      </div>
+      <div class="quests-list" id="quests-list">
+        <!-- Quests injected -->
+      </div>
+    </section>
+
+    <!-- Add Quest -->
+    <section class="section">
+      <div class="section-title">
+        <span>Configure Routines</span>
+      </div>
+      <div class="add-quest-form">
+        <input class="full" type="text" id="new-title" placeholder="Quest (e.g. 30 pushups, Deep work 45m)" />
+        <select id="new-stat">
+          <option value="Strength">Strength</option>
+          <option value="Wisdom">Wisdom</option>
+          <option value="Money">Money</option>
+          <option value="Social">Social</option>
+          <option value="Mental Health">Mental Health</option>
+        </select>
+        <select id="new-difficulty">
+          <option value="Easy">Easy</option>
+          <option value="Normal">Normal</option>
+          <option value="Hard">Hard</option>
+        </select>
+        <input type="number" id="new-xp" placeholder="XP (e.g. 20)" min="1" />
+        <button class="full" id="add-quest-btn">Add / Update Quest</button>
+      </div>
+      <div class="footer-note">
+        Start small, then increase difficulty as your stats rise. Skipping quests and hitting “Fail” will reduce stats and XP.
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const BASE_STATS = ["Strength", "Wisdom", "Money", "Social", "Mental Health"];
+
+    const DEFAULT_QUESTS = [
+      { id: "q1", title: "20 minutes of exercise", stat: "Strength", difficulty: "Normal", xp: 25 },
+      { id: "q2", title: "Read 10 pages", stat: "Wisdom", difficulty: "Easy", xp: 15 },
+      { id: "q3", title: "No impulse spending today", stat: "Money", difficulty: "Hard", xp: 35 },
+      { id: "q4", title: "Send 1 thoughtful message", stat: "Social", difficulty: "Easy", xp: 15 },
+      { id: "q5", title: "10 minutes of mindfulness", stat: "Mental Health", difficulty: "Normal", xp: 20 }
+    ];
+
+    const STORAGE_KEY = "solo_leveling_irl_v2";
+
+    function getTodayKey() {
+      const d = new Date();
+      return d.toISOString().slice(0, 10);
+    }
+
+    function loadState() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) {
+        const initial = {
+          player: {
+            level: 1,
+            xp: 0,
+            nextLevelXp: 100,
+            title: "Rookie Hunter",
+            stats: BASE_STATS.reduce((acc, s) => {
+              acc[s] = 5;
+              return acc;
+            }, {})
+          },
+          quests: DEFAULT_QUESTS,
+          dailyStatus: {},
+          lastOpened: getTodayKey()
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
+        return initial;
+      }
+      try {
+        return JSON.parse(raw);
+      } catch {
+        localStorage.removeItem(STORAGE_KEY);
+        return loadState();
+      }
+    }
+
+    function saveState(state) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function levelUpIfNeeded(player) {
+      while (player.xp >= player.nextLevelXp) {
+        player.xp -= player.nextLevelXp;
+        player.level += 1;
+        player.nextLevelXp = Math.round(player.nextLevelXp * 1.4);
+
+        if (player.level >= 10 && player.level < 20) player.title = "E-Rank Hunter";
+        else if (player.level >= 20 && player.level < 30) player.title = "D-Rank Hunter";
+        else if (player.level >= 30 && player.level < 40) player.title = "C-Rank Hunter";
+        else if (player.level >= 40 && player.level < 50) player.title = "B-Rank Hunter";
+        else if (player.level >= 50) player.title = "Shadow Monarch (In Training)";
+      }
+    }
+
+    function adjustStatsForQuest(player, quest, direction) {
+      const delta = direction === "up" ? 1 : -1;
+      const difficultyMultiplier = quest.difficulty === "Easy" ? 1 : quest.difficulty === "Normal" ? 2 : 3;
+      const change = delta * difficultyMultiplier;
+      const statName = quest.stat;
+
+      if (player.stats[statName] == null) player.stats[statName] = 0;
+
+      player.stats[statName] += change;
+      if (player.stats[statName] < 0) player.stats[statName] = 0;
+    }
+
+    function completeQuest(state, questId, dateKey) {
+      const quest = state.quests.find(q => q.id === questId);
+      if (!quest) return;
+      const todayStatus = state.dailyStatus[dateKey] || {};
+      if (todayStatus[questId] === "complete") return;
+
+      todayStatus[questId] = "complete";
+      state.dailyStatus[dateKey] = todayStatus;
+
+      state.player.xp += quest.xp;
+      adjustStatsForQuest(state.player, quest, "up");
+      levelUpIfNeeded(state.player);
+      saveState(state);
+      render(state);
+    }
+
+    function failQuest(state, questId, dateKey) {
+      const quest = state.quests.find(q => q.id === questId);
+      if (!quest) return;
+      const todayStatus = state.dailyStatus[dateKey] || {};
+      if (todayStatus[questId] === "fail") return;
+
+      todayStatus[questId] = "fail";
+      state.dailyStatus[dateKey] = todayStatus;
+
+      const penaltyXp = Math.round(quest.xp * 0.4);
+      state.player.xp -= penaltyXp;
+      if (state.player.xp < 0) state.player.xp = 0;
+
+      adjustStatsForQuest(state.player, quest, "down");
+      saveState(state);
+      render(state);
+    }
+
+    function addQuest(state, data) {
+      const existing = state.quests.find(q => q.title.toLowerCase() === data.title.toLowerCase());
+      if (existing) {
+        existing.stat = data.stat;
+        existing.difficulty = data.difficulty;
+        existing.xp = data.xp;
+      } else {
+        const id = "q" + Math.random().toString(36).slice(2, 10);
+        state.quests.push({
+          id,
+          title: data.title,
+          stat: data.stat,
+          difficulty: data.difficulty,
+          xp: data.xp
+        });
+      }
+      saveState(state);
+      render(state);
+    }
+
+    function renderStats(player) {
+      const grid = document.getElementById("stats-grid");
+      grid.innerHTML = "";
+
+      document.getElementById("player-level").textContent = player.level;
+      document.getElementById("player-xp").textContent = player.xp;
+      document.getElementById("player-next-xp").textContent = player.nextLevelXp;
+      document.getElementById("player-title").textContent = player.title;
+      document.getElementById("player-title-pill").textContent = player.title;
+
+      const ratio = player.nextLevelXp > 0 ? player.xp / player.nextLevelXp : 0;
+      const xpBar = document.getElementById("xp-bar");
+      xpBar.style.transform = `scaleX(${Math.max(0, Math.min(1, ratio))})`;
+
+      BASE_STATS.forEach(statName => {
+        const value = player.stats[statName] ?? 0;
+        const percentage = Math.min(100, (value / 50) * 100);
+
+        const card = document.createElement("div");
+        card.className = "stat-card";
+        card.innerHTML = `
+          <div class="stat-header">
+            <span>${statName}</span>
+            <span>${value >= 40 ? "S" : value >= 30 ? "A" : value >= 20 ? "B" : "C"}</span>
+          </div>
+          <div class="stat-value">${value}</div>
+          <div class="stat-bar">
+            <div class="stat-bar-fill" style="width:${percentage}%"></div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function renderQuests(state) {
+      const list = document.getElementById("quests-list");
+      list.innerHTML = "";
+      const todayKey = getTodayKey();
+      const todayStatus = state.dailyStatus[todayKey] || {};
+
+      state.quests.forEach(quest => {
+        const status = todayStatus[quest.id];
+        const card = document.createElement("div");
+        card.className = "quest-card";
+
+        card.innerHTML = `
+          <div class="quest-left">
+            <input type="checkbox" ${status === "complete" ? "checked" : ""} ${status === "complete" ? "disabled" : ""} />
+            <div class="quest-main">
+              <div class="quest-title">${quest.title}</div>
+              <div class="quest-meta">
+                <span class="tag tag-${quest.stat.replace(" ", "\\ ")}">${quest.stat}</span>
+                <span class="tag">${quest.difficulty}</span>
+                <span>${quest.xp} XP</span>
+                ${status === "complete" ? "<span class='status-text status-complete'>COMPLETED</span>" : ""}
+                ${status === "fail" ? "<span class='status-text status-fail'>FAILED</span>" : ""}
+              </div>
+            </div>
+          </div>
+          <div class="quest-actions">
+            <button class="small complete-btn" ${status === "complete" ? "disabled" : ""}>Complete</button>
+            <button class="small secondary fail-btn" ${status === "fail" ? "disabled" : ""}>Fail</button>
+          </div>
+        `;
+
+        const checkbox = card.querySelector("input[type=checkbox]");
+        const completeBtn = card.querySelector(".complete-btn");
+        const failBtn = card.querySelector(".fail-btn");
+
+        completeBtn.addEventListener("click", () => completeQuest(state, quest.id, todayKey));
+        checkbox.addEventListener("change", (e) => {
+          if (e.target.checked) completeQuest(state, quest.id, todayKey);
+        });
+        failBtn.addEventListener("click", () => failQuest(state, quest.id, todayKey));
+
+        list.appendChild(card);
+      });
+
+      const dailyInfo = document.getElementById("daily-reset-info");
+      dailyInfo.textContent = `DAY ${todayKey}`;
+    }
+
+    function render(state) {
+      renderStats(state.player);
+      renderQuests(state);
+    }
+
+    function setupAddQuest(state) {
+      const titleInput = document.getElementById("new-title");
+      const statSelect = document.getElementById("new-stat");
+      const diffSelect = document.getElementById("new-difficulty");
+      const xpInput = document.getElementById("new-xp");
+      const btn = document.getElementById("add-quest-btn");
+
+      btn.addEventListener("click", () => {
+        const title = titleInput.value.trim();
+        const stat = statSelect.value;
+        const difficulty = diffSelect.value;
+        const xp = parseInt(xpInput.value, 10);
+
+        if (!title || !stat || !difficulty || isNaN(xp) || xp <= 0) {
+          alert("Fill in all fields with a positive XP value.");
+          return;
+        }
+
+        addQuest(state, { title, stat, difficulty, xp });
+        titleInput.value = "";
+        xpInput.value = "";
+      });
+    }
+
+    function setupResetButton(state) {
+      const btn = document.getElementById("reset-today-btn");
+      btn.addEventListener("click", () => {
+        const todayKey = getTodayKey();
+        if (confirm("Reset today's quest status? XP and stats will stay as they are.")) {
+          delete state.dailyStatus[todayKey];
+          saveState(state);
+          render(state);
+        }
+      });
+    }
+
+    (function init() {
+      const state = loadState();
+      const todayKey = getTodayKey();
+      if (state.lastOpened !== todayKey) {
+        state.lastOpened = todayKey;
+        saveState(state);
+      }
+      render(state);
+      setupAddQuest(state);
+      setupResetButton(state);
+    })();
+  </script>
+</body>
+</html>
