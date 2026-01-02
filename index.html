@@ -65,6 +65,112 @@
       mix-blend-mode: screen;
     }
 
+    /* NEW: GLOWING ANIMATIONS */
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(56, 189, 248, 0.4); }
+      50% { box-shadow: 0 0 40px rgba(56, 189, 248, 0.8); }
+    }
+
+    @keyframes level-explosion {
+      0% { transform: scale(1) rotate(0); }
+      25% { transform: scale(1.1) rotate(5deg); }
+      50% { transform: scale(1.2) rotate(-5deg); }
+      100% { transform: scale(1) rotate(0); }
+    }
+
+    @keyframes sparkle {
+      0% { opacity: 1; transform: scale(1) rotate(0); }
+      100% { opacity: 0; transform: scale(2) rotate(180deg); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .stat-bar-fill.updated { animation: pulse-glow 1s ease-out; }
+
+    .quest-card.complete {
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(74, 222, 128, 0.15));
+      border-color: #22c55e;
+      transform: scale(1.02);
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .quest-card.complete::after {
+      content: '✨';
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      font-size: 16px;
+      animation: sparkle 2s ease-out;
+    }
+
+    .player-main-row.level-up {
+      animation: level-explosion 0.8s ease-out;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.3), transparent);
+    }
+
+    /* TOAST NOTIFICATIONS */
+    #toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+    }
+
+    .toast {
+      padding: 12px 20px;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--accent-soft);
+      border-radius: 12px;
+      box-shadow: var(--shadow-soft);
+      transform: translateX(400px);
+      transition: transform 0.3s ease;
+      font-weight: 600;
+      margin-bottom: 8px;
+      max-width: 300px;
+    }
+
+    .toast.show { transform: translateX(0); }
+    .toast.success { border-color: #22c55e; color: #bbf7d0; }
+    .toast.level { background: linear-gradient(135deg, var(--accent), #6366f1); border-color: #38bdf8; color: white; }
+
+    /* SYNC STATUS */
+    .sync-badge {
+      padding: 4px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--accent-soft);
+      font-size: 11px;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.2), transparent);
+      animation: pulse 2s infinite;
+    }
+
+    #streak-badge {
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: var(--bg-chip);
+      border: 1px solid rgba(34, 197, 94, 0.6);
+      font-size: 10px;
+      font-weight: 600;
+      color: #4ade80;
+      margin-left: 8px;
+    }
+
+    /* ENHANCED HEADER */
+    header::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent), #6366f1, var(--accent));
+      border-radius: 0 0 12px 12px;
+    }
+
     header {
       position: relative;
       z-index: 1;
@@ -93,6 +199,8 @@
     .subtitle {
       font-size: 11px;
       color: var(--text-muted);
+      display: flex;
+      align-items: center;
     }
 
     .hp-badge {
@@ -301,6 +409,7 @@
       border: 1px solid rgba(148, 163, 184, 0.6);
       box-shadow: var(--shadow-soft);
       font-size: 12px;
+      position: relative;
     }
 
     .quest-left {
@@ -477,17 +586,17 @@
 </head>
 <body>
   <div class="app-shell">
+    <div id="toast-container"></div>
+
     <header>
       <div class="title-stack">
         <h1>SYSTEM ONLINE</h1>
         <div class="subtitle">
-          <span id="header-player-name">Unnamed Hunter</span> • Solo Leveling: IRL
+          <span id="header-player-name">Unnamed Hunter</span>
+          <span id="streak-badge"></span>
         </div>
       </div>
-      <div class="hp-badge">
-        <div class="hp-dot"></div>
-        <span id="daily-reset-info">Syncing…</span>
-      </div>
+      <div class="sync-badge" id="sync-status">● LIVE</div>
     </header>
 
     <!-- Player / Stats -->
@@ -532,7 +641,7 @@
         <button class="small secondary" id="reset-today-btn">Reset Today</button>
       </div>
       <div class="quests-header-row">
-        <span>Complete all to clear today’s routine.</span>
+        <span>Complete all to clear today's routine.</span>
         <span>Auto-resets each new day.</span>
       </div>
       <div class="quests-list" id="quests-list"></div>
@@ -550,7 +659,7 @@
       </div>
       <div class="urgent-body" id="urgent-body">
         <div class="urgent-empty">
-          No urgent quest active. Press “Roll Urgent Quest” to summon one.
+          No urgent quest active. Press "Roll Urgent Quest" to summon one.
         </div>
       </div>
     </section>
@@ -578,7 +687,7 @@
         <button class="full" id="add-quest-btn">Add / Update Quest</button>
       </div>
       <div class="footer-note">
-        Start small, then increase difficulty as your stats rise. Skipping quests and hitting “Fail” will reduce stats and XP.
+        Start small, then increase difficulty as your stats rise. Skipping quests and hitting "Fail" will reduce stats and XP.
       </div>
     </section>
   </div>
@@ -594,7 +703,6 @@
       { id: "q5", title: "10 minutes of mindfulness", stat: "Mental Health", difficulty: "Normal", xp: 20 }
     ];
 
-    // A pool of random urgent quests
     const URGENT_QUESTS = [
       { title: "100 pushups RIGHT NOW", stat: "Strength", difficulty: "Hard", xp: 60 },
       { title: "Read the Bible for 5 minutes", stat: "Wisdom", difficulty: "Normal", xp: 30 },
@@ -630,7 +738,7 @@
           },
           quests: DEFAULT_QUESTS,
           dailyStatus: {},
-          urgent: null, // { quest, status: 'pending' | 'complete' | 'fail' }
+          urgent: null,
           lastOpened: getTodayKey()
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
@@ -675,6 +783,16 @@
       if (player.stats[statName] < 0) player.stats[statName] = 0;
     }
 
+    // NEW: Toast notification system
+    function showToast(message, type = 'default') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      document.getElementById('toast-container').appendChild(toast);
+      setTimeout(() => toast.classList.add('show'), 100);
+      setTimeout(() => toast.remove(), 4000);
+    }
+
     function completeQuest(state, quest, dateKey, isDaily) {
       if (!quest) return;
 
@@ -685,10 +803,28 @@
         state.dailyStatus[dateKey] = todayStatus;
       }
 
+      const oldLevel = state.player.level;
       state.player.xp += quest.xp;
       adjustStatsForQuest(state.player, quest, "up");
       levelUpIfNeeded(state.player);
+      const leveledUp = state.player.level > oldLevel;
+
       saveState(state);
+
+      // NEW: UI Effects
+      const card = event?.target.closest('.quest-card');
+      if (card) card.classList.add('complete');
+      
+      showToast(`✨ ${quest.title} +${quest.xp}XP!`, 'success');
+      
+      if (leveledUp) {
+        const playerRow = document.querySelector('.player-main-row');
+        if (playerRow) playerRow.classList.add('level-up');
+        showToast(`🎉 LEVEL ${state.player.level}!`, 'level');
+        setTimeout(() => playerRow?.classList.remove('level-up'), 800);
+      }
+
+      setTimeout(() => card?.classList.remove('complete'), 3000);
       render(state);
     }
 
@@ -708,6 +844,8 @@
 
       adjustStatsForQuest(state.player, quest, "down");
       saveState(state);
+
+      showToast(`❌ ${quest.title} failed -${penaltyXp}XP`, 'default');
       render(state);
     }
 
@@ -728,6 +866,7 @@
         });
       }
       saveState(state);
+      showToast(`✅ Quest added/updated`, 'success');
       render(state);
     }
 
@@ -768,6 +907,31 @@
         `;
         grid.appendChild(card);
       });
+    }
+
+    // NEW: Streak calculation
+    function renderStreak(state) {
+      const todayKey = getTodayKey();
+      let streak = 0;
+      let currentDay = todayKey;
+      
+      while (true) {
+        const dayStatus = state.dailyStatus[currentDay];
+        if (!dayStatus) break;
+        const statusValues = Object.values(dayStatus);
+        if (statusValues.every(s => s === "complete")) {
+          streak++;
+        } else {
+          break;
+        }
+        
+        const d = new Date(currentDay + 'T00:00:00');
+        d.setDate(d.getDate() - 1);
+        currentDay = d.toISOString().slice(0, 10);
+      }
+      
+      const badge = document.getElementById('streak-badge');
+      badge.textContent = streak > 0 ? `🔥 ${streak} day${streak !== 1 ? 's' : ''}` : '';
     }
 
     function renderQuests(state) {
@@ -814,8 +978,8 @@
         list.appendChild(card);
       });
 
-      const dailyInfo = document.getElementById("daily-reset-info");
-      dailyInfo.textContent = `DAY ${todayKey}`;
+      const dailyInfo = document.getElementById("sync-status");
+      dailyInfo.textContent = `📅 ${todayKey}`;
     }
 
     function renderUrgent(state) {
@@ -828,7 +992,7 @@
       if (!urgent || !urgent.quest) {
         container.innerHTML = `
           <div class="urgent-empty">
-            No urgent quest active. Press “Roll Urgent Quest” to summon one.
+            No urgent quest active. Press "Roll Urgent Quest" to summon one.
           </div>
         `;
         return;
@@ -886,6 +1050,7 @@
       renderStats(state.player);
       renderQuests(state);
       renderUrgent(state);
+      renderStreak(state);
     }
 
     function setupAddQuest(state) {
@@ -918,8 +1083,10 @@
         const todayKey = getTodayKey();
         if (confirm("Reset today's quest status? XP and stats will stay as they are.")) {
           delete state.dailyStatus[todayKey];
+          state.urgent = null;
           saveState(state);
           render(state);
+          showToast("📄 Today's status reset", 'success');
         }
       });
     }
@@ -937,22 +1104,30 @@
     function setupUrgent(state) {
       const rollBtn = document.getElementById("urgent-roll-btn");
       rollBtn.addEventListener("click", () => {
-        const randomIndex = Math.floor(Math.random() * URGENT_QUESTS.length); // [web:40]
+        const randomIndex = Math.floor(Math.random() * URGENT_QUESTS.length);
         const base = URGENT_QUESTS[randomIndex];
         state.urgent = {
           quest: { ...base },
           status: "pending"
         };
         saveState(state);
+        showToast("⚠️ Urgent quest appeared!", 'level');
         renderUrgent(state);
       });
     }
 
+    // NEW: Live status pulse
+    setInterval(() => {
+      const status = document.getElementById("sync-status");
+      status.style.opacity = status.style.opacity === "0.7" ? "1" : "0.7";
+    }, 2000);
+
     (function init() {
-      const state = loadState(); // [web:46][web:52][web:57]
+      const state = loadState();
       const todayKey = getTodayKey();
       if (state.lastOpened !== todayKey) {
         state.lastOpened = todayKey;
+        state.urgent = null;
         saveState(state);
       }
       render(state);
