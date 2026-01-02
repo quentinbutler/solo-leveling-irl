@@ -3,12 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <title>Solo Leveling: IRL System</title>
-
-  <!-- Mobile-friendly viewport -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" /> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
-    /* ===== Base + Layout (mobile-first) ===== */
     :root {
       --bg-main: #020617;
       --bg-panel: rgba(15, 23, 42, 0.9);
@@ -54,7 +51,6 @@
       overflow: hidden;
     }
 
-    /* subtle scanlines / system vibe */
     .app-shell::before {
       content: "";
       position: absolute;
@@ -85,6 +81,432 @@
       display: flex;
       flex-direction: column;
       gap: 2px;
+    }
+
+    h1 {
+      font-size: 18px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .subtitle {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .hp-badge {
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--accent-soft);
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.2), transparent 70%);
+    }
+
+    .hp-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #22c55e, #4ade80);
+      box-shadow: 0 0 8px rgba(74, 222, 128, 0.9);
+    }
+
+    .section {
+      position: relative;
+      z-index: 1;
+      background: var(--bg-panel);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-soft);
+      box-shadow: 0 0 18px rgba(15, 23, 42, 0.8);
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+
+    .section-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pill {
+      border-radius: 999px;
+      padding: 2px 8px;
+      border: 1px solid var(--accent-soft);
+      font-size: 10px;
+      color: var(--accent-strong);
+    }
+
+    /* Player / Stats */
+
+    .player-header {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+
+    .player-main-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+    }
+
+    .player-main-row strong {
+      font-size: 14px;
+      color: var(--accent-strong);
+    }
+
+    .xp-bar-outer {
+      position: relative;
+      width: 100%;
+      height: 10px;
+      border-radius: 999px;
+      background: radial-gradient(circle at center, rgba(15, 23, 42, 0.9), #020617);
+      overflow: hidden;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+    }
+
+    .xp-bar-inner {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, #22d3ee, #38bdf8, #6366f1);
+      width: 40%;
+      transform-origin: left;
+      transform: scaleX(0);
+      transition: transform 0.25s ease-out;
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.8);
+    }
+
+    .xp-label-row {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 3px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .player-name-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+      font-size: 11px;
+      align-items: center;
+    }
+
+    .player-name-row span {
+      white-space: nowrap;
+      color: var(--text-muted);
+    }
+
+    .player-name-display {
+      font-size: 11px;
+      color: var(--accent-strong);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    @media (min-width: 560px) {
+      .app-shell {
+        max-width: 560px;
+        padding: 16px 16px 22px;
+      }
+      .stats-grid {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+      }
+    }
+
+    .stat-card {
+      border-radius: var(--radius-md);
+      padding: 6px 6px 7px;
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 1));
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      box-shadow: 0 0 10px rgba(15, 23, 42, 0.9);
+    }
+
+    .stat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+    }
+
+    .stat-value {
+      font-size: 16px;
+      font-weight: 600;
+      color: #f9fafb;
+      margin-bottom: 3px;
+    }
+
+    .stat-bar {
+      height: 5px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      overflow: hidden;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+    }
+
+    .stat-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #22c55e, #a3e635);
+      box-shadow: 0 0 8px rgba(34, 197, 94, 0.7);
+      transition: width 0.25s ease-out;
+    }
+
+    /* Quests */
+
+    .quests-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .quests-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .quest-card {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      padding: 8px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.98));
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      box-shadow: var(--shadow-soft);
+      font-size: 12px;
+    }
+
+    .quest-left {
+      display: flex;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .quest-main {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .quest-title {
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .quest-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .tag {
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: var(--bg-chip);
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .tag-Strength { border-color: #f97373; color: #fecaca; }
+    .tag-Wisdom { border-color: #38bdf8; color: #bae6fd; }
+    .tag-Money { border-color: #4ade80; color: #bbf7d0; }
+    .tag-Social { border-color: #facc15; color: #fef9c3; }
+    .tag-Mental\ Health { border-color: #a855f7; color: #e9d5ff; }
+
+    .quest-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .status-text {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .status-complete {
+      color: #4ade80;
+    }
+
+    .status-fail {
+      color: var(--danger);
+    }
+
+    /* Urgent Quest */
+
+    .urgent-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .urgent-body {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 12px;
+    }
+
+    .urgent-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #fee2e2;
+    }
+
+    .urgent-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .urgent-empty {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Form / Buttons */
+
+    button, input, select {
+      font-family: inherit;
+      font-size: 12px;
+    }
+
+    button {
+      background: radial-gradient(circle at top, var(--accent-strong), #0ea5e9);
+      color: #f9fafb;
+      border: 1px solid rgba(56, 189, 248, 0.9);
+      border-radius: 999px;
+      padding: 6px 10px;
+      cursor: pointer;
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.8);
+      white-space: nowrap;
+    }
+
+    button.small {
+      padding: 4px 8px;
+      font-size: 11px;
+      box-shadow: none;
+    }
+
+    button.secondary {
+      background: rgba(15, 23, 42, 0.9);
+      border-color: rgba(148, 163, 184, 0.7);
+      box-shadow: none;
+      color: var(--text-muted);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    input, select {
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      border-radius: 999px;
+      padding: 6px 10px;
+      color: var(--text-main);
+      width: 100%;
+    }
+
+    .add-quest-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .add-quest-form .full {
+      grid-column: 1 / -1;
+    }
+
+    .footer-note {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    @media (max-width: 380px) {
+      h1 { font-size: 16px; }
+      .player-main-row { flex-direction: column; align-items: flex-start; }
+      .quest-card { flex-direction: column; }
+      .quest-actions { flex-direction: row; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header>
+      <div class="title-stack">
+        <h1>SYSTEM ONLINE</h1>
+        <div class="subtitle">
+          <span id="header-player-name">Unnamed Hunter</span> • Solo Leveling: IRL
+        </div>
+      </div>
+      <div class="hp-badge">
+        <div class="hp-dot"></div>
+        <span id="daily-reset-info">Syncing…</span>
+      </div>
+    </header>
+
+    <!-- Player / Stats -->
+    <section class="section">
+      <div class="section-title">
+        <span>Player Status</span>
+        <span class="pill" id="player-title-pill">Rookie Hunter</span>
+      </div>
+
+      <div class="player-header">
+        <div class="player-main-row">
+          <div>Level <strong id="player-level">1</strong></div>
+          <div>XP <strong><span id="player-xp">0</span>/<span id="player-next-xp">100</span></strong></div>
+        </div>
+        <div class="xp-bar-outer">
+          <div class="xp-bar-inner" id="xp-bar"></div>
+        </div>
+        <div class="xp-label-row">
+          <span id="player-title">Rookie Hu
     }
 
     h1 {
